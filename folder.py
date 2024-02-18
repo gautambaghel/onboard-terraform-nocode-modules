@@ -1,17 +1,19 @@
 #!/usr/bin/env python3
 import os
-import inquirer
 import subprocess
 import requests
 import json
-import tarfile
 
 import globals
 import utils
 
-def create_nocode_module(config_location, provider_name, module_version):
-    provider_name = utils.validate_terraform_folder(config_location)
-    module_name = os.path.basename(config_location)
+def create_nocode_module(config_path, module_version):
+    module_name = os.path.basename(config_path)
+    provider_name = utils.validate_terraform_folder(module_name)
+    headers = {
+        "Content-Type": "application/vnd.api+json",
+        "Authorization": f"Bearer {globals.TFC_API_TOKEN}"
+    }
     payload = {
         "data": {
             "type": "registry-modules",
@@ -23,24 +25,22 @@ def create_nocode_module(config_location, provider_name, module_version):
             }
         }
     }
-
     url = f"{globals.BASE_URL}/registry-modules"
-    headers = {
-        "Content-Type": "application/vnd.api+json",
-        "Authorization": f"Bearer {globals.TFC_API_TOKEN}"
-    }
     response = requests.post(url, json=payload, headers=headers)
 
     if response.status_code == 201:
         print("Module created successfully!")
-        create_nocode_module_version(module_name, provider_name, module_version)
+        create_nocode_module_version(config_path, module_name, provider_name, module_version)
     else:
         print(f"POST request failed for creating module with status code: {response.status_code}")
         print(response.json())
         exit(1)
 
-
-def create_nocode_module_version(module_name, provider_name, module_version):
+def create_nocode_module_version(config_path, module_name, provider_name, module_version):
+    headers = {
+        "Content-Type": "application/vnd.api+json",
+        "Authorization": f"Bearer {globals.TFC_API_TOKEN}"
+    }
     payload = {
         "data": {
             "type": "registry-modules-versions",
@@ -49,12 +49,7 @@ def create_nocode_module_version(module_name, provider_name, module_version):
             }
         }
     }
-
     url = f"{globals.BASE_URL}/registry-modules/private/{globals.TFC_ORG}/{module_name}/{provider_name}/versions"
-    headers = {
-        "Content-Type": "application/vnd.api+json",
-        "Authorization": f"Bearer {globals.TFC_API_TOKEN}"
-    }
     response = requests.post(url, json=payload, headers=headers)
 
     if response.status_code == 201:
@@ -62,7 +57,7 @@ def create_nocode_module_version(module_name, provider_name, module_version):
         response_json = response.json()
         try:
             upload_link = response_json['data']['links']['upload']
-            upload_nocode_module(config_kind, upload_link)
+            upload_nocode_module(config_path, upload_link)
         except (KeyError, TypeError):
             print("Failed to retrieve the upload link in the response")
             exit(1)
@@ -91,20 +86,3 @@ def upload_nocode_module(config_path, upload_link):
         print(f"PUT request failed for uploading module with status code: {response.status_code}")
         print(response.json())
         exit(1)
-
-def create_nocode_module_with_repo(config_repo_url):
-    repo_name = utils.validate_github_repo(config_repo_url)
-    #TODO: get oauth token id or github app installation id
-    payload = {
-        "data": {
-            "type": "registry-modules",
-            "attributes": {
-                "vcs-repo": {
-                    "identifier":f"{repo_name}",
-                    "oauth-token-id":"ot-hmAyP66qk2AMVdbJ",
-                    "display_identifier":f"{repo_name}"
-                },
-            "no-code": true
-            }
-        }
-    }

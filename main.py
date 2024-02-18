@@ -4,10 +4,11 @@ import inquirer
 import subprocess
 import requests
 import json
-import tarfile
 
 import globals
-import create
+import registry
+import github
+import folder
 import delete
 
 def main():
@@ -17,32 +18,22 @@ def main():
     and performs the corresponding actions based on the user's choice.
     """
 
-    # Ask kind of Terraform to onboard
     onboard_kind_question = [
         inquirer.List('onboard_kind',
-                    message="Which kind of Terraform would you like to onboard as a no-code module?",
-                    choices=['Terraform config', 'Terraform module', 'Delete no-code module'],
+                    message="What would you like to do?",
+                    choices=['Onboard Terraform no-code module', 'Delete Terraform no-code module'],
                 ),
     ]
     onboard_kind_answer = inquirer.prompt(onboard_kind_question)["onboard_kind"]
 
-    # ask for the name of the module or config
-    if onboard_kind_answer == 'Terraform module':
-        module_name_question = [
-            inquirer.Text('module_name',
-                        message="What is the name of the module?",
-                    ),
-        ]
-        module_name_answer = inquirer.prompt(module_name_question)["module_name"]
-        print(module_name_answer)
-
-    elif onboard_kind_answer == 'Terraform config':
+    # ask for the module options
+    if onboard_kind_answer == 'Onboard Terraform no-code module':
 
         # ask for the location of the config, and create the no-code module
         config_kind_question = [
             inquirer.List('config_kind',
                         message="Where is your Terraform config?",
-                        choices=['Local folder', 'GitHub repository'],
+                        choices=['Local folder', 'GitHub repository', 'Terraform public registry'],
                         default=os.getcwd()
                     ),
         ]
@@ -53,26 +44,36 @@ def main():
             config_location_question = [
                 inquirer.Text('config_location',
                             message="Please enter the path to your Terraform config folder",
-                            default=os.getcwd()
+                            default=f"{os.getcwd()}/terraform-null-test"
                         ),
             ]
             config_location = inquirer.prompt(config_location_question)["config_location"]
             print(f"Uploading Terraform at: {config_location} and using it as the no-code module name.")
-            create.create_nocode_module(config_location, "0.0.1")
+            folder.create_nocode_module(config_location, "0.0.1")
 
         # ask for the URL of the GitHub repository
         elif config_kind == 'GitHub repository':
             config_location_question = [
                 inquirer.Text('config_location',
-                            message="Please enter the URL of your GitHub repository",
-                            default=os.getcwd()
+                            message="Please enter the URL of your GitHub repository"
                         ),
             ]
             config_location = inquirer.prompt(config_location_question)["config_location"]
             print(f"Uploading Terraform at: {config_location}")
-            create.create_nocode_module_with_repo(config_location)
+            github.create_nocode_module(config_location, "0.0.1")
 
-    elif onboard_kind_answer == 'Delete no-code module':
+        # ask for the URL of the Terraform module
+        elif config_kind == 'Terraform public registry':
+            config_location_question = [
+                inquirer.Text('config_location',
+                            message="Please enter the URL of the public Terraform registry \n (e.g. https://registry.terraform.io/modules/terraform-aws-modules/vpc/aws/latest)"
+                        ),
+            ]
+            config_location = inquirer.prompt(config_location_question)["config_location"]
+            print(f"Uploading Terraform at: {config_location}")
+            registry.create_nocode_module(config_location)
+
+    elif onboard_kind_answer == 'Delete Terraform no-code module':
 
         # ask for the name of the module to delete
         delete_name_question = [

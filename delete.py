@@ -1,10 +1,6 @@
 #!/usr/bin/env python3
-import os
-import subprocess
 import requests
 import json
-import tarfile
-import inquirer
 import globals
 
 def delete_nocode_module(name):
@@ -13,7 +9,7 @@ def delete_nocode_module(name):
         "Content-Type": "application/vnd.api+json",
         "Authorization": f"Bearer {globals.TFC_API_TOKEN}"
     }
-    
+
     response = requests.delete(url, headers=headers)
 
     if response.status_code == 204:

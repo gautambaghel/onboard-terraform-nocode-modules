@@ -1,19 +1,29 @@
 #!/usr/bin/env python3
 import os
 import re
+import tarfile
 
-def validate_terraform_folder(name):
-    if not re.match(r'^terraform-.*-.*$', folder_name):
+import globals
+
+def validate_terraform_folder(folder_name):
+    match = re.match(r'^terraform-([^/]+)-([^/]+)', folder_name)
+    if match:
+        # Split folder_name with the value of the first two dashes
+        split_folder_name = folder_name.split('-', 2)
+        return split_folder_name[1]
+    else:
         print("Invalid folder name format. Folder name should have the pattern 'terraform-provider-*'.")
         exit(1)
 
-    # Split folder_name with the value of the first two dashes
-    split_folder_name = folder_name.split('-', 2)
-    return split_folder_name[1]
 
 def validate_github_repo(repo_url):
-    #TODO: return the repo name
-    if not re.match(r'^https?://github.com/.*$', repo_url):
+    # Extract the organization and repository name from the URL
+    match = re.match(r'^https?://github.com/([^/]+)/([^/]+)', repo_url)
+    if match:
+        org_name = match.group(1)
+        repo_name = match.group(2)
+        return f"{org_name}/{repo_name}"
+    else:
         print("Invalid GitHub repository URL.")
         exit(1)
 
