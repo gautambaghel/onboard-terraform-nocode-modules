@@ -42,7 +42,7 @@ def create_nocode_module(config_repo_url, module_version):
         print("VCS module created successfully!")
     else:
         print(f"POST request failed for creating module version")
-        print(response.json())
+        print(json.dumps(response.json(), indent=4))
         exit(1)
 
 # This function asks for the branch name to use

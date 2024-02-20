@@ -16,5 +16,5 @@ def delete_nocode_module(name):
         print("No-code module deleted successfully!")
     else:
         print(f"PUT request failed for uploading module with status code: {response.status_code}")
-        print(response.json())
+        print(json.dumps(response.json(), indent=4))
         exit(1)

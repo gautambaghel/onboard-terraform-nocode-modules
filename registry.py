@@ -34,7 +34,7 @@ def create_nocode_module(registry_repo_url):
         print("Module created successfully!")
     else:
         print(f"POST request failed for creating module with status code: {response.status_code}")
-        print(response.json())
+        print(json.dumps(response.json(), indent=4))
         exit(1)
 
 def get_attributes_from_registry(registry_repo_url):

@@ -7,6 +7,7 @@ import json
 
 import globals
 import registry
+import configure
 import github
 import folder
 import delete
@@ -21,7 +22,7 @@ def main():
     onboard_kind_question = [
         inquirer.List('onboard_kind',
                     message="What would you like to do?",
-                    choices=['Onboard Terraform no-code module', 'Delete Terraform no-code module'],
+                    choices=['Onboard Terraform no-code module', 'Configure Terraform no-code module', 'Delete Terraform no-code module'],
                 ),
     ]
     onboard_kind_answer = inquirer.prompt(onboard_kind_question)["onboard_kind"]
@@ -72,6 +73,25 @@ def main():
             config_location = inquirer.prompt(config_location_question)["config_location"]
             print(f"Uploading Terraform at: {config_location}")
             registry.create_nocode_module(config_location)
+
+    elif onboard_kind_answer == 'Configure Terraform no-code module':
+
+        # ask for the name of the module to configure
+        configure_name_question = [
+            inquirer.Text('configure_name',
+                        message="What is the name of the module to configure?",
+                    ),
+        ]
+        configure_name_answer = inquirer.prompt(configure_name_question)["configure_name"]
+
+        # ask for the module options
+        configure_provider_question = [
+            inquirer.Text('configure_provider',
+                        message="What is the name of provider for the module?",
+                    ),
+        ]
+        configure_provider_answer = inquirer.prompt(configure_provider_question)["configure_provider"]
+        configure.configure_nocode_module(configure_name_answer, configure_provider_answer)
 
     elif onboard_kind_answer == 'Delete Terraform no-code module':
 

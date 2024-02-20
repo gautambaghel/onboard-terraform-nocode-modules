@@ -33,7 +33,7 @@ def create_nocode_module(config_path, module_version):
         create_nocode_module_version(config_path, module_name, provider_name, module_version)
     else:
         print(f"POST request failed for creating module with status code: {response.status_code}")
-        print(response.json())
+        print(json.dumps(response.json(), indent=4))
         exit(1)
 
 def create_nocode_module_version(config_path, module_name, provider_name, module_version):
@@ -63,7 +63,7 @@ def create_nocode_module_version(config_path, module_name, provider_name, module
             exit(1)
     else:
         print(f"POST request failed for creating module version with status code: {response.status_code}")
-        print(response.json())
+        print(json.dumps(response.json(), indent=4))
         exit(1)
 
 def upload_nocode_module(config_path, upload_link):
@@ -84,5 +84,5 @@ def upload_nocode_module(config_path, upload_link):
         print("No-code module created successfully!")
     else:
         print(f"PUT request failed for uploading module with status code: {response.status_code}")
-        print(response.json())
+        print(json.dumps(response.json(), indent=4))
         exit(1)
